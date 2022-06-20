@@ -179,6 +179,7 @@ create pipe stg_pokemon_species_pipe auto_ingest=true as
 ------------------------------------------------------------------------
 -- 4.4.1. stg_pokemon streams
 ------------------------------------------------------------------------
+create stream stg_pokemon_stream on table stg_pokemon;
 create stream stg_pokemon_stats_stream on table stg_pokemon;
 create stream stg_pokemon_initial_types_stream on table stg_pokemon;
 create stream stg_pokemon_types_history_stream on table stg_pokemon;
@@ -192,6 +193,7 @@ create stream stg_types_pokemon_stream on table stg_types;
 ------------------------------------------------------------------------
 -- 4.4.3. stg_moves stream
 ------------------------------------------------------------------------
+create stream stg_moves_stream on table stg_moves;
 create stream stg_moves_pokemon_stream on table stg_moves;
 
 ------------------------------------------------------------------------
@@ -219,82 +221,121 @@ use schema pokemon.dwh;
 ------------------------------------------------------------------------
 -- 5.1.1. types
 ------------------------------------------------------------------------
-create table if not exists types(t_id number,
-                                 t_type varchar
+create table if not exists types(t_id number not null,
+                                 t_type varchar not null,
+                                 constraint pkey_1 primary key (t_type) not enforced
                                  );
 
 ------------------------------------------------------------------------
--- 5.1.2. types_pokemon
+-- 5.1.2. moves
+------------------------------------------------------------------------
+create table if not exists moves(m_id number not null,
+                                 m_name varchar not null,
+                                 constraint pkey_1 primary key (m_name) not enforced
+                                );
+
+------------------------------------------------------------------------
+-- 5.1.3. pokemon
+------------------------------------------------------------------------
+create table if not exists pokemon(p_id number not null,
+                                   p_name varchar not null,
+                                   constraint pkey_1 primary key (p_name) not enforced
+                                  );
+
+------------------------------------------------------------------------
+-- 5.1.4. generations
+------------------------------------------------------------------------
+create table if not exists generations(g_id number not null,
+                                       g_generation_name varchar not null constraint uniq_g_name unique not enforced,
+                                       constraint pkey_1 primary key (g_id) not enforced
+                                      );
+
+------------------------------------------------------------------------
+-- 5.1.5. types_pokemon
 ------------------------------------------------------------------------
 create table if not exists types_pokemon(tp_id number autoincrement start 1 increment 1,
-                                         tp_type varchar,
-                                         tp_pokemon varchar
+                                         tp_type varchar not null,
+                                         tp_pokemon varchar,
+                                         constraint pkey_1 primary key (tp_id) not enforced,
+                                         constraint fkey_1 foreign key (tp_type) references types (t_type) not enforced,
+                                         constraint fkey_2 foreign key (tp_pokemon) references pokemon (p_name) not enforced
                                         );
 
 ------------------------------------------------------------------------
--- 5.1.3. moves_pokemon
+-- 5.1.6. moves_pokemon
 ------------------------------------------------------------------------
 create table if not exists moves_pokemon(mp_id number autoincrement start 1 increment 1,
-                                         mp_move varchar,
-                                         mp_pokemon varchar
+                                         mp_move varchar not null,
+                                         mp_pokemon varchar,
+                                         constraint pkey_1 primary key (mp_id) not enforced,
+                                         constraint fkey_1 foreign key (mp_move) references moves (m_name) not enforced,
+                                         constraint fkey_2 foreign key (mp_pokemon) references pokemon (p_name) not enforced
                                         );
 
 ------------------------------------------------------------------------
--- 5.1.4. pokemon_stats
+-- 5.1.7. pokemon_stats
 ------------------------------------------------------------------------
 create table if not exists pokemon_stats(ps_id number autoincrement start 1 increment 1,
-                                         ps_pokemon varchar,
+                                         ps_pokemon varchar not null,
                                          ps_stat varchar,
-                                         ps_stat_value number
+                                         ps_stat_value number,
+                                         constraint pkey_1 primary key (ps_id) not enforced,
+                                         constraint fkey_1 foreign key (ps_pokemon) references pokemon (p_name) not enforced
                                         );
 
 ------------------------------------------------------------------------
--- 5.1.5. species_pokemon
+-- 5.1.8. species_pokemon
 ------------------------------------------------------------------------
 create table if not exists species_pokemon(sp_id number autoincrement start 1 increment 1,
-                                           sp_specie varchar,
-                                           sp_pokemon varchar
+                                           sp_specie varchar not null,
+                                           sp_pokemon varchar,
+                                           constraint pkey_1 primary key (sp_id) not enforced
                                           );
 
 ------------------------------------------------------------------------
--- 5.1.6. generations_species
+-- 5.1.9. generations_species
 ------------------------------------------------------------------------
 create table if not exists generations_species(gs_id number autoincrement start 1 increment 1,
-                                               gs_generation_id number,
-                                               gs_specie varchar
+                                               gs_generation_id number not null,
+                                               gs_specie varchar,
+                                               constraint pkey_1 primary key (gs_id) not enforced,
+                                               constraint fkey_1 foreign key (gs_generation_id) references generations (g_id) not enforced
                                               );
 
 ------------------------------------------------------------------------
--- 5.1.7. pokemon_initial_types
+-- 5.1.10. pokemon_initial_types
 ------------------------------------------------------------------------
 create table if not exists pokemon_initial_types(pit_id number autoincrement start 1 increment 1,
-                                                 pit_pokemon varchar,
-                                                 pit_initial_type varchar
+                                                 pit_pokemon varchar not null,
+                                                 pit_initial_type varchar not null,
+                                                 constraint pkey_1 primary key (pit_id) not enforced,
+                                                 constraint fkey_1 foreign key (pit_pokemon) references pokemon (p_name) not enforced,
+                                                 constraint fkey_2 foreign key (pit_initial_type) references types (t_type) not enforced
                                                 );
 
 ------------------------------------------------------------------------
--- 5.1.8. generations_types
+-- 5.1.11. generations_types
 ------------------------------------------------------------------------
 create table if not exists generations_types(gt_id number autoincrement start 1 increment 1,
-                                             gt_generation_id number,
-                                             gt_type varchar
+                                             gt_generation_id number not null,
+                                             gt_type varchar not null,
+                                             constraint pkey_1 primary key (gt_id) not enforced,
+                                             constraint fkey_1 foreign key (gt_type) references types (t_type) not enforced,
+                                             constraint fkey_2 foreign key (gt_generation_id) references generations (g_id) not enforced
                                             );
 
 ------------------------------------------------------------------------
--- 5.1.9. pokemon_types_history
+-- 5.1.12. pokemon_types_history
 ------------------------------------------------------------------------
 create table if not exists pokemon_types_history(pth_id number autoincrement start 1 increment 1,
-                                                 pth_pokemon varchar,
-                                                 pth_generation_name varchar,
-                                                 pth_type varchar
+                                                 pth_pokemon varchar not null,
+                                                 pth_generation_name varchar not null,
+                                                 pth_type varchar not null,
+                                                 constraint pkey_1 primary key (pth_id) not enforced,
+                                                 constraint fkey_1 foreign key (pth_pokemon) references pokemon (p_name) not enforced,
+                                                 constraint fkey_2 foreign key (pth_generation_name) references generations (g_generation_name) not enforced,
+                                                 constraint fkey_3 foreign key (pth_type) references types (t_type) not enforced
                                                 );
-
-------------------------------------------------------------------------
--- 5.1.10. generations
-------------------------------------------------------------------------
-create table if not exists generations(g_id number,
-                                       g_generation_name varchar
-                                      );
 
 
 ------------------------------------------------------------------------
@@ -320,9 +361,65 @@ create task if not exists moving_stg_types
                 stg_types_stream t;
 
 alter task moving_stg_types suspend;
+------------------------------------------------------------------------
+-- 6.2. moves
+------------------------------------------------------------------------
+create task if not exists moving_stg_moves
+    warehouse = 'tasks_wh'
+    schedule = '5 minute'
+    when system$stream_has_data('stg_moves_stream')
+    as
+        insert into pokemon.dwh.moves(m_id,
+                                      m_name
+                                     )
+            select
+                t.json_data:id::number as m_id,
+                t.json_data:name::varchar as m_name
+            from
+                stg_moves_stream t;
+
+alter task moving_stg_moves suspend;
 
 ------------------------------------------------------------------------
--- 6.2. types_pokemon
+-- 6.3. pokemon
+------------------------------------------------------------------------
+create task if not exists moving_stg_pokemon
+    warehouse = 'tasks_wh'
+    schedule = '5 minute'
+    when system$stream_has_data('stg_pokemon_stream')
+    as
+        insert into pokemon.dwh.pokemon(p_id,
+                                        p_name
+                                       )
+            select
+                t.json_data:id::number as p_id,
+                t.json_data:name::varchar as p_name
+            from
+                stg_pokemon_stream t;
+
+alter task moving_stg_pokemon suspend;
+
+------------------------------------------------------------------------
+-- 6.4. moving_stg_generations
+------------------------------------------------------------------------
+create task if not exists moving_stg_generations
+    warehouse = 'tasks_wh'
+    schedule = '5 minute'
+    when system$stream_has_data('stg_generations_stream')
+    as
+        insert into pokemon.dwh.generations(g_id,
+                                            g_generation_name
+                                           )
+            select
+                t.json_data:id::number as g_id,
+                t.json_data:name::varchar as g_generation_name
+            from
+                stg_generations_stream t;
+
+alter task moving_stg_generations suspend;
+
+------------------------------------------------------------------------
+-- 6.5. types_pokemon
 ------------------------------------------------------------------------
 create task if not exists moving_stg_types_pokemon
     warehouse = 'tasks_wh'
@@ -342,7 +439,7 @@ create task if not exists moving_stg_types_pokemon
 alter task moving_stg_types_pokemon suspend;
 
 ------------------------------------------------------------------------
--- 6.3. moves_pokemon
+-- 6.6. moves_pokemon
 ------------------------------------------------------------------------
 create task if not exists moving_stg_moves_pokemon
     warehouse = 'tasks_wh'
@@ -362,7 +459,7 @@ create task if not exists moving_stg_moves_pokemon
 alter task moving_stg_moves_pokemon suspend;
 
 ------------------------------------------------------------------------
--- 6.4. pokemon_stats
+-- 6.7. pokemon_stats
 ------------------------------------------------------------------------
 create task if not exists moving_stg_pokemon_stats
     warehouse = 'tasks_wh'
@@ -384,7 +481,7 @@ create task if not exists moving_stg_pokemon_stats
 alter task moving_stg_pokemon_stats suspend;
 
 ------------------------------------------------------------------------
--- 6.5. species_pokemon
+-- 6.8. species_pokemon
 ------------------------------------------------------------------------
 create task if not exists moving_stg_species_pokemon
     warehouse = 'tasks_wh'
@@ -404,7 +501,7 @@ create task if not exists moving_stg_species_pokemon
 alter task moving_stg_species_pokemon suspend;
 
 ------------------------------------------------------------------------
--- 6.6. generations_species
+-- 6.9. generations_species
 ------------------------------------------------------------------------
 create task if not exists moving_stg_generations_species
     warehouse = 'tasks_wh'
@@ -424,7 +521,7 @@ create task if not exists moving_stg_generations_species
 alter task moving_stg_generations_species suspend;
 
 ------------------------------------------------------------------------
--- 6.7. pokemon_initial_types
+-- 6.10. pokemon_initial_types
 ------------------------------------------------------------------------
 create task if not exists moving_stg_pokemon_initial_types
     warehouse = 'tasks_wh'
@@ -444,7 +541,7 @@ create task if not exists moving_stg_pokemon_initial_types
 alter task moving_stg_pokemon_initial_types suspend;
 
 ------------------------------------------------------------------------
--- 6.8. generations_types
+-- 6.11. generations_types
 ------------------------------------------------------------------------
 create task if not exists moving_stg_generations_types
     warehouse = 'tasks_wh'
@@ -464,7 +561,7 @@ create task if not exists moving_stg_generations_types
 alter task moving_stg_generations_types suspend;
 
 ------------------------------------------------------------------------
--- 6.9. pokemon_types_history
+-- 6.12. pokemon_types_history
 ------------------------------------------------------------------------
 create task if not exists moving_stg_pokemon_types_history
     warehouse = 'tasks_wh'
@@ -485,25 +582,6 @@ create task if not exists moving_stg_pokemon_types_history
                 lateral flatten (input => f.value:types) f1;
 
 alter task moving_stg_pokemon_types_history suspend;
-
-------------------------------------------------------------------------
--- 6.10. moving_stg_generations
-------------------------------------------------------------------------
-create task if not exists moving_stg_generations
-    warehouse = 'tasks_wh'
-    schedule = '5 minute'
-    when system$stream_has_data('stg_generations_stream')
-    as
-        insert into pokemon.dwh.generations(g_id,
-                                            g_generation_name
-                                           )
-            select
-                t.json_data:id::number as g_id,
-                t.json_data:name::varchar as g_generation_name
-            from
-                stg_generations_stream t;
-
-alter task moving_stg_generations suspend;
 
 
 ------------------------------------------------------------------------
