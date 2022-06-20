@@ -21,7 +21,7 @@ with DAG(
     start = PythonOperator(
         task_id='start',
         python_callable=display,
-        op_args=['Welcome to the world of tomorrow!']
+        op_args=['Check for new generations DAG started.']
     )
 
     check = PythonOperator(

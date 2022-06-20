@@ -17,7 +17,7 @@ with DAG(
     start = PythonOperator(
         task_id='start',
         python_callable=display,
-        op_args=['Welcome to the world of tomorrow!']
+        op_args=['Load data DAG started.']
     )
 
     extract_and_load = PythonOperator(
@@ -28,10 +28,7 @@ with DAG(
     success = PythonOperator(
         task_id='success',
         python_callable=display,
-        op_args=[
-            'SUCCESS. Processed files: '
-            '{{ task_instance.xcom_pull(task_ids="processing", '
-            'key="processed_files") }}.'],
+        op_args=['SUCCESS.'],
         trigger_rule=TriggerRule.ALL_SUCCESS
     )
 
