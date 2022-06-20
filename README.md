@@ -14,6 +14,8 @@ Project uses following technologies and resources:
 - Snowpipe to transfer data to DWH
 - Snowflake as DWH host
 - DWH uses some kind of galaxy schema
+- Daily checks for new pokémon generations logs are here:
+    - s3://de-school-snowflake/snowpipe/Degtyarev/generations_check_log/
 
 <br>
 
@@ -25,6 +27,7 @@ Project uses following technologies and resources:
 .
 ├── LICENSE
 ├── README.md
+├── requirements.txt
 ├── scripts
 │   └── snowflake_script.sql
 ├── src
