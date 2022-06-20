@@ -123,7 +123,7 @@ def check_for_new_generations(execution_date) -> None:
     generations_s3_prefix = f"{S3_TARGET_FOLDER}generations/"
     current_generations_count = len(list_s3_keys(generations_s3_prefix))
 
-    generations_info_from_api = {}
+    generations_info_from_api: dict[str, dict] = {}
 
     generation_endpoint = f"{POKE_API_URL}generation/"
 

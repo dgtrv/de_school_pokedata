@@ -41,7 +41,7 @@ async def _get_async(
 
         await asyncio.sleep(DELAY_PER_TASK)
 
-        if type(save_results_to) is dict:
+        if isinstance(save_results_to, dict):
             save_results_to[url] = obj
             return
 
@@ -95,13 +95,13 @@ async def get_pokeapi_endpoint(
     if not endpoint_url.endswith("/"):
         endpoint_url = f"{endpoint_url}/"
 
-    endpoint_info = {}
+    endpoint_info: dict[str, dict] = {}
 
     await make_api_requests(endpoint_info, [endpoint_url])
 
     endpoint_count = int(endpoint_info[endpoint_url]["count"])
 
-    endpoint_list = {}
+    endpoint_list: dict[str, dict] = {}
 
     await make_api_requests(
         endpoint_list, [f"{endpoint_url}?limit={endpoint_count}"]

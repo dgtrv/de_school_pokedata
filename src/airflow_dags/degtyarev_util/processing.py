@@ -2,7 +2,7 @@
 from typing import List
 
 
-def clean_json_data(json_obj: object, keys_to_use: List[str]) -> dict:
+def clean_json_data(json_obj: dict, keys_to_use: List[str]) -> dict:
     """
     Clean supplied json object and return as a dictionary.
 
