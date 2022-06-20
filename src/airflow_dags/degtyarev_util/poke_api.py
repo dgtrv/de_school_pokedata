@@ -65,7 +65,7 @@ async def make_api_requests(
     session = aiohttp.ClientSession()
 
     await _gather_with_concurrency(
-        maximum_threads=MAX_THREADS_FOR_API_CALLS,
+        MAX_THREADS_FOR_API_CALLS,
         *[
             _get_async(url, session, save_results_to_or_with, processing)
             for url in urls
