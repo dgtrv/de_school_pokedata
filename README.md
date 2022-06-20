@@ -3,15 +3,53 @@
 Final project for Quantori Data enineering school 2022
 <br>
 
-## Project folders structure
-
-
+## Project structure
 
 <br>
 
+Project uses following technologies and resources:
+- PokéAPI v2 (https://pokeapi.co)
+- Python and MWAA for orchestration
+- S3 for staging file storage
+- Snowpipe to transfer data to DWH
+- Snowflake as DWH host
+- DWH uses some kind of galaxy schema
+
+<br>
+
+### Directory structure:
+
+<br>
+
+```
+.
+├── LICENSE
+├── README.md
+├── scripts
+│   └── snowflake_script.sql
+├── src
+│   └── airflow_dags
+│       ├── degtyarev_daily_generetions_check.py
+│       ├── degtyarev_load_pokemon_data.py
+│       └── degtyarev_util
+│           ├── __init__.py
+│           ├── __pycache__
+│           ├── control.py
+│           ├── poke_api.py
+│           ├── processing.py
+│           └── s3_util.py
+└── test
+
+```
+
+- `src/scripts` folder contains script for Snowflake DWH setup
+- `src/airflow_dags` dir is for Airflow (MWAA) control DAGs code and helper-modules
+- `test` is for unit tests
+<br>
+
 ## Setup
-- Upload content (subfolders structure should be preserved) of /src/airflow_dags folder to MWAA DAGs S3 bucket
-- Use /scripts/snowflake_script.sql to set up Snowflake DWH, you will need to fill in the correct S3 credentials instead of "**"
+- Upload content (subfolders structure should be preserved) of `src/airflow_dags` folder to MWAA DAGs S3 bucket
+- Use `scripts/snowflake_script.sql` to set up Snowflake DWH, you will need to fill in the correct S3 credentials instead of "**"
 
 <br>
 
