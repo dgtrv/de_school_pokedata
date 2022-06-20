@@ -1,19 +1,10 @@
-"""DAG for loading pokemon data to S3.
-
-Executes .
-"""
+"""Module with Airflow DAG that controls loading pokemon data to S3."""
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 from airflow.utils.trigger_rule import TriggerRule
 
-from degtyarev_util.control import extract_and_save_data
-
-
-def _display(text: str) -> None:
-    """Display supplied text. Obviously."""
-    print(text)
-
+from degtyarev_util.control import display, extract_and_save_data
 
 with DAG(
     dag_id='degtyarev_load_pokemon_data',
@@ -25,7 +16,7 @@ with DAG(
 ) as dag:
     start = PythonOperator(
         task_id='start',
-        python_callable=_display,
+        python_callable=display,
         op_args=['Welcome to the world of tomorrow!']
     )
 
@@ -36,7 +27,7 @@ with DAG(
 
     success = PythonOperator(
         task_id='success',
-        python_callable=_display,
+        python_callable=display,
         op_args=[
             'SUCCESS. Processed files: '
             '{{ task_instance.xcom_pull(task_ids="processing", '
@@ -46,7 +37,7 @@ with DAG(
 
     fail = PythonOperator(
         task_id='failed',
-        python_callable=_display,
+        python_callable=display,
         op_args=['FAIL'],
         trigger_rule=TriggerRule.ALL_FAILED
     )

@@ -1,19 +1,14 @@
-"""DAG for daily check for new pokemon generations.
+"""Module containing DAG for scheduled new pokemon generations check.
 
-Executes .
+Does the check, downloads and saved data if necessary, writes info to
+log file.
 """
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 from airflow.utils.trigger_rule import TriggerRule
 
-from degtyarev_util.control import check_for_new_generations
-
-
-def _display(text: str) -> None:
-    """Display supplied text. Obviously."""
-    print(text)
-
+from degtyarev_util.control import check_for_new_generations, display
 
 with DAG(
     dag_id='degtyarev_daily_generations_check',
@@ -25,7 +20,7 @@ with DAG(
 ) as dag:
     start = PythonOperator(
         task_id='start',
-        python_callable=_display,
+        python_callable=display,
         op_args=['Welcome to the world of tomorrow!']
     )
 
@@ -36,14 +31,14 @@ with DAG(
 
     success = PythonOperator(
         task_id='success',
-        python_callable=_display,
+        python_callable=display,
         op_args=['SUCCESS'],
         trigger_rule=TriggerRule.ALL_SUCCESS
     )
 
     fail = PythonOperator(
         task_id='failed',
-        python_callable=_display,
+        python_callable=display,
         op_args=['FAIL'],
         trigger_rule=TriggerRule.ALL_FAILED
     )
