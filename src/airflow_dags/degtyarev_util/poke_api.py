@@ -14,8 +14,8 @@ MAX_API_CALLS_PER_SECOND_PER_THREAD = 5
 DELAY_PER_TASK = 1.0 / MAX_API_CALLS_PER_SECOND_PER_THREAD
 
 
-async def _gather_with_concurrency(n, *tasks):
-    semaphore = asyncio.Semaphore(n)
+async def _gather_with_concurrency(maximum_threads, *tasks):
+    semaphore = asyncio.Semaphore(maximum_threads)
 
     async def sem_task(task):
         async with semaphore:
@@ -25,19 +25,26 @@ async def _gather_with_concurrency(n, *tasks):
 
 
 async def _get_async(
-    url, session, save_results_to, processing: List[Callable] = None
+    url: str,
+    session: aiohttp.ClientSession,
+    save_results_to: Union[Callable, dict],
+    processing: List[Callable] = None
 ):
     async with session.get(url) as response:
         print(f"time: {time.time()}, calling url: {url}")
         obj = await response.json()
         print(f"time: {time.time()}, got url: {url}")
+
         if processing:
             for function in processing:
                 obj = function(obj)
+
         await asyncio.sleep(DELAY_PER_TASK)
+
         if type(save_results_to) is dict:
             save_results_to[url] = obj
             return
+
         save_results_to(obj)
 
 
@@ -57,12 +64,11 @@ async def make_api_requests(
     """
     session = aiohttp.ClientSession()
 
-    conc_req = MAX_THREADS_FOR_API_CALLS
     await _gather_with_concurrency(
-        conc_req,
+        maximum_threads=MAX_THREADS_FOR_API_CALLS,
         *[
-            _get_async(i, session, save_results_to_or_with, processing)
-            for i in urls
+            _get_async(url, session, save_results_to_or_with, processing)
+            for url in urls
         ],
     )
 
@@ -89,11 +95,11 @@ async def get_pokeapi_endpoint(
     if not endpoint_url.endswith("/"):
         endpoint_url = f"{endpoint_url}/"
 
-    endpoint = {}
+    endpoint_info = {}
 
-    await make_api_requests(endpoint, [endpoint_url])
+    await make_api_requests(endpoint_info, [endpoint_url])
 
-    endpoint_count = int(endpoint[endpoint_url]["count"])
+    endpoint_count = int(endpoint_info[endpoint_url]["count"])
 
     endpoint_list = {}
 
